@@ -1,11 +1,6 @@
 package com.buildcrm.mapper;
 
-import com.buildcrm.dto.response.ProjectResponse;
-import com.buildcrm.dto.response.ProjectResponse.ProjectInventoryResponse;
-import com.buildcrm.dto.response.ProjectResponse.ProjectTransactionResponse;
-import com.buildcrm.dto.response.ProjectResponse.ProjectExpenseResponse;
-import com.buildcrm.dto.response.ProjectResponse.ProjectActivityResponse;
-import com.buildcrm.dto.response.ProjectResponse.ProjectDocumentResponse;
+import com.buildcrm.dto.response.*;
 import com.buildcrm.entity.ProjectEntity;
 import com.buildcrm.entity.ProjectInventoryEntity;
 import com.buildcrm.entity.DocumentEntity;
@@ -19,7 +14,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+
+import static com.buildcrm.enums.EmployeeRole.LABOR;
+import static com.buildcrm.enums.ExpenseCategory.*;
 
 @Mapper(componentModel = "spring", uses = {EmployeeMapper.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {

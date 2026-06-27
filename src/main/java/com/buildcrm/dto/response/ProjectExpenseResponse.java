@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-class ProjectExpenseResponse {
+public class ProjectExpenseResponse {
 
     private UUID id;
     private LocalDate date;

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-class ProjectActivityResponse {
+public class ProjectActivityResponse {
 
     private UUID id;
     private String message;
