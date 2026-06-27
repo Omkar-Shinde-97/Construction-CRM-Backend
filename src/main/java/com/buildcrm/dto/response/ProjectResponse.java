@@ -3,7 +3,6 @@ package com.buildcrm.dto.response;
 import com.buildcrm.enums.ProjectCategory;
 import com.buildcrm.enums.ProjectStatus;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -384,114 +383,5 @@ public class ProjectResponse {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-    public static class ProjectInventoryResponse {
-        private UUID id;
-        private String unitNo;
-        private String type;          // Flat, Plot, NA Plot
-        private String area;
-        private BigDecimal price;
-        private String status;        // Available, Sold, Blocked
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public String getUnitNo() { return unitNo; }
-        public void setUnitNo(String unitNo) { this.unitNo = unitNo; }
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-        public String getArea() { return area; }
-        public void setArea(String area) { this.area = area; }
-        public BigDecimal getPrice() { return price; }
-        public void setPrice(BigDecimal price) { this.price = price; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-    }
-
-    public static class ProjectTransactionResponse {
-        private UUID id;
-        private String invoiceNo;
-        private LocalDate date;
-        private String description;
-        private BigDecimal amount;
-        private BigDecimal collectedAmount;
-        private String status; // Paid, Pending, Overdue
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public String getInvoiceNo() { return invoiceNo; }
-        public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
-        public LocalDate getDate() { return date; }
-        public void setDate(LocalDate date) { this.date = date; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        public BigDecimal getAmount() { return amount; }
-        public void setAmount(BigDecimal amount) { this.amount = amount; }
-        public BigDecimal getCollectedAmount() { return collectedAmount; }
-        public void setCollectedAmount(BigDecimal collectedAmount) { this.collectedAmount = collectedAmount; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-    }
-
-    public static class ProjectExpenseResponse {
-        private UUID id;
-        private LocalDate date;
-        private String category; // Labor, Material, Equipment, Overhead
-        private String description;
-        private BigDecimal amount;
-        private String addedBy;
-        private String receiptUrl;
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public LocalDate getDate() { return date; }
-        public void setDate(LocalDate date) { this.date = date; }
-        public String getCategory() { return category; }
-        public void setCategory(String category) { this.category = category; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        public BigDecimal getAmount() { return amount; }
-        public void setAmount(BigDecimal amount) { this.amount = amount; }
-        public String getAddedBy() { return addedBy; }
-        public void setAddedBy(String addedBy) { this.addedBy = addedBy; }
-        public String getReceiptUrl() { return receiptUrl; }
-        public void setReceiptUrl(String receiptUrl) { this.receiptUrl = receiptUrl; }
-    }
-
-    public static class ProjectActivityResponse {
-        private UUID id;
-        private String message;
-        private OffsetDateTime activityDate;
-        private String performedBy;
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
-        public OffsetDateTime getActivityDate() { return activityDate; }
-        public void setActivityDate(OffsetDateTime activityDate) { this.activityDate = activityDate; }
-        public String getPerformedBy() { return performedBy; }
-        public void setPerformedBy(String performedBy) { this.performedBy = performedBy; }
-    }
-
-    public static class ProjectDocumentResponse {
-        private UUID id;
-        private String name;
-        private String type;
-        private String size;
-        private String fileUrl;
-        private OffsetDateTime uploadedAt;
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-        public String getSize() { return size; }
-        public void setSize(String size) { this.size = size; }
-        public String getFileUrl() { return fileUrl; }
-        public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
-        public OffsetDateTime getUploadedAt() { return uploadedAt; }
-        public void setUploadedAt(OffsetDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
     }
 }
