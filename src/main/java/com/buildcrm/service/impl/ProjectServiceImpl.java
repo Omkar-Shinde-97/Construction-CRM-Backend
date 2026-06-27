@@ -60,6 +60,17 @@ public class ProjectServiceImpl implements ProjectService {
     private final ActivityLogRepository activityLogRepository;
     private final ProjectMapper projectMapper;
 
+    public ProjectServiceImpl(ProjectRepository projectRepository, EmployeeRepository employeeRepository, ProjectInventoryRepository projectInventoryRepository, DocumentRepository documentRepository, ExpenseRepository expenseRepository, SaleTransactionRepository saleTransactionRepository, ActivityLogRepository activityLogRepository, ProjectMapper projectMapper) {
+        this.projectRepository = projectRepository;
+        this.employeeRepository = employeeRepository;
+        this.projectInventoryRepository = projectInventoryRepository;
+        this.documentRepository = documentRepository;
+        this.expenseRepository = expenseRepository;
+        this.saleTransactionRepository = saleTransactionRepository;
+        this.activityLogRepository = activityLogRepository;
+        this.projectMapper = projectMapper;
+    }
+
     @Override
     @Transactional
     @SuppressWarnings("null")
