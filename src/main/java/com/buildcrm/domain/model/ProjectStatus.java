@@ -1,0 +1,10 @@
+package com.buildcrm.domain.model;
+
+public enum ProjectStatus {
+    PLANNING,
+    IN_PROGRESS,
+    ON_HOLD,
+    COMPLETED,
+    WON,
+    LOST
+}
