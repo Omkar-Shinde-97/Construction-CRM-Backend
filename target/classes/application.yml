@@ -11,8 +11,11 @@ spring:
       hibernate:
         format_sql: true
         jdbc.lob.non_contextual_creation: true
+        enable_lazy_load_no_trans: true  # ADD THIS LINE
+        default_batch_fetch_size: 20     # OPTIONAL: Improves performance
       javax.persistence.validation.mode: auto
     show-sql: false
+    open-in-view: false  # RECOMMENDED: Prevents lazy loading outside transaction
   flyway:
     enabled: true
     baseline-on-migrate: true

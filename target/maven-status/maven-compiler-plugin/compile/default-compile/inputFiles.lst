@@ -64,6 +64,7 @@
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/domain/model/CompanySettings.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/service/impl/AuthServiceImpl.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/domain/repository/PipelineRepository.java
+/Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/dto/request/AssignTeamRequest.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/repository/EmployeeRepository.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/entity/AttendanceRecordEntity.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/enums/Department.java
@@ -71,6 +72,7 @@
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/domain/model/PipelineProject.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/dto/request/AddTransactionRequest.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/domain/repository/SalesRepository.java
+/Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/dto/request/AddNoteRequest.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/domain/repository/EmployeeRepository.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/service/interfaces/UserService.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/dto/request/LoginRequest.java
@@ -82,6 +84,7 @@
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/enums/ProjectCategory.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/security/jwt/JwtAuthenticationEntryPoint.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/enums/EmployeeStatus.java
+/Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/dto/response/ProjectNoteResponse.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/config/DataSeeder.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/security/jwt/CustomUserDetailsService.java
 /Users/omkarshinde/Desktop/ConstructionApp back end/src/main/java/com/buildcrm/entity/ExpenseEntity.java

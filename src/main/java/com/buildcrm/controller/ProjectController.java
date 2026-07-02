@@ -3,12 +3,17 @@ package com.buildcrm.controller;
 import com.buildcrm.dto.request.CreateProjectRequest;
 import com.buildcrm.dto.request.UpdateProjectRequest;
 import com.buildcrm.dto.request.AddInventoryRequest;
+import com.buildcrm.dto.request.AddNoteRequest;
 import com.buildcrm.dto.request.AddDocumentRequest;
 import com.buildcrm.dto.request.AddExpenseRequest;
 import com.buildcrm.dto.request.AddTransactionRequest;
+import com.buildcrm.dto.request.AssignTeamRequest;
 import com.buildcrm.dto.request.AddActivityRequest;
 import com.buildcrm.dto.response.ApiResponse;
+import com.buildcrm.dto.response.EmployeeResponse;
 import com.buildcrm.dto.response.PagedResponse;
+import com.buildcrm.dto.response.ProjectInventoryResponse;
+import com.buildcrm.dto.response.ProjectNoteResponse;
 import com.buildcrm.dto.response.ProjectResponse;
 import com.buildcrm.service.interfaces.ProjectService;
 import jakarta.validation.Valid;
@@ -24,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -65,6 +70,34 @@ public class ProjectController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Projects listed", response));
     }
 
+     @GetMapping("/{id}/team")
+    public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getProjectTeam(
+            @PathVariable UUID id) {
+        List<EmployeeResponse> team = projectService.getProjectTeam(id);
+        return ResponseEntity.ok(new ApiResponse<>(
+            true,
+            "Project team retrieved",
+            team
+        ));
+    }
+
+    @GetMapping("/{id}/notes")
+    public ResponseEntity<ApiResponse<List<ProjectNoteResponse>>> getProjectNotes(
+        @PathVariable("id") UUID id) {
+        List<ProjectNoteResponse> notes = projectService.getProjectNotes(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Project notes retrieved", notes));
+    }
+
+       @PostMapping("/{id}/notes")
+    public ResponseEntity<ApiResponse<ProjectNoteResponse>> addNote(
+        @PathVariable UUID id,
+        @Valid @RequestBody AddNoteRequest request
+    ) {
+        ProjectNoteResponse response = projectService.addNote(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Note added to project", response));
+    }
+    
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(
         @PathVariable UUID id,
@@ -81,11 +114,18 @@ public class ProjectController {
     }
 
     @PostMapping("/{id}/inventories")
-    public ResponseEntity<ApiResponse<ProjectResponse>> addInventory(
+    public ResponseEntity<ApiResponse<ProjectInventoryResponse>> addInventory(
         @PathVariable UUID id,
         @Valid @RequestBody AddInventoryRequest request
     ) {
-        ProjectResponse response = projectService.addInventory(id, request);
+        ProjectInventoryResponse response = projectService.addInventory(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Inventory added to project", response));
+    }
+
+      @GetMapping("/{id}/inventories")
+    public ResponseEntity<ApiResponse<List<ProjectInventoryResponse>>> getInventories(
+        @PathVariable UUID id) {
+        List<ProjectInventoryResponse> response = projectService.getInventories(id);
         return ResponseEntity.ok(new ApiResponse<>(true, "Inventory added to project", response));
     }
 
@@ -125,12 +165,18 @@ public class ProjectController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Activity recorded for project", response));
     }
 
-    @PostMapping("/{id}/team")
+   @PostMapping("/{id}/team")
     public ResponseEntity<ApiResponse<ProjectResponse>> assignTeam(
         @PathVariable UUID id,
-        @RequestBody Set<UUID> employeeIds
-    ) {
-        ProjectResponse response = projectService.assignTeam(id, employeeIds);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Team members assigned to project", response));
-    }
+        @RequestBody AssignTeamRequest request
+) {
+        ProjectResponse response =
+            projectService.assignTeam(id, request.employeeIds());
+
+         return ResponseEntity.ok(
+            new ApiResponse<>(true,
+                    "Team members assigned to project",
+                    response)
+    );
+}
 }

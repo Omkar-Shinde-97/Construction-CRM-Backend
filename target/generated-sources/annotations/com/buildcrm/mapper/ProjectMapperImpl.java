@@ -5,6 +5,7 @@ import com.buildcrm.dto.response.ProjectActivityResponse;
 import com.buildcrm.dto.response.ProjectDocumentResponse;
 import com.buildcrm.dto.response.ProjectExpenseResponse;
 import com.buildcrm.dto.response.ProjectInventoryResponse;
+import com.buildcrm.dto.response.ProjectNoteResponse;
 import com.buildcrm.dto.response.ProjectResponse;
 import com.buildcrm.dto.response.ProjectTransactionResponse;
 import com.buildcrm.entity.ActivityLogEntity;
@@ -13,6 +14,7 @@ import com.buildcrm.entity.EmployeeEntity;
 import com.buildcrm.entity.ExpenseEntity;
 import com.buildcrm.entity.ProjectEntity;
 import com.buildcrm.entity.ProjectInventoryEntity;
+import com.buildcrm.entity.ProjectNoteEntity;
 import com.buildcrm.entity.SaleTransactionEntity;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-27T16:31:18+0530",
+    date = "2026-07-01T21:36:50+0530",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
@@ -44,6 +46,7 @@ public class ProjectMapperImpl implements ProjectMapper {
         projectResponse.setTeamMembers( employeeEntitySetToEmployeeResponseSet( entity.getTeam() ) );
         projectResponse.setTotalContractValue( entity.getContractValue() );
         projectResponse.setTransactions( saleTransactionEntitySetToProjectTransactionResponseList( entity.getSalesTransactions() ) );
+        projectResponse.setInventories( projectInventoryEntitySetToProjectInventoryResponseList( entity.getInventories() ) );
         projectResponse.setId( entity.getId() );
         projectResponse.setProjectCode( entity.getProjectCode() );
         projectResponse.setName( entity.getName() );
@@ -61,7 +64,6 @@ public class ProjectMapperImpl implements ProjectMapper {
         projectResponse.setCompletionPercentage( entity.getCompletionPercentage() );
         projectResponse.setCoverImageUrl( entity.getCoverImageUrl() );
         projectResponse.setProjectManager( employeeMapper.toResponse( entity.getProjectManager() ) );
-        projectResponse.setInventories( projectInventoryEntitySetToProjectInventoryResponseList( entity.getInventories() ) );
         projectResponse.setExpenses( expenseEntitySetToProjectExpenseResponseList( entity.getExpenses() ) );
         projectResponse.setDocuments( documentEntitySetToProjectDocumentResponseList( entity.getDocuments() ) );
         projectResponse.setActivities( activityLogEntitySetToProjectActivityResponseList( entity.getActivities() ) );
@@ -74,6 +76,22 @@ public class ProjectMapperImpl implements ProjectMapper {
     }
 
     @Override
+    public ProjectNoteResponse toNoteResponse(ProjectNoteEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        ProjectNoteResponse projectNoteResponse = new ProjectNoteResponse();
+
+        projectNoteResponse.setCreatedAt( entity.getCreatedAt() );
+        projectNoteResponse.setCreatedBy( entity.getCreatedBy() );
+        projectNoteResponse.setId( entity.getId() );
+        projectNoteResponse.setNote( entity.getContent() );
+
+        return projectNoteResponse;
+    }
+
+    @Override
     public ProjectInventoryResponse toInventoryResponse(ProjectInventoryEntity entity) {
         if ( entity == null ) {
             return null;
@@ -81,12 +99,13 @@ public class ProjectMapperImpl implements ProjectMapper {
 
         ProjectInventoryResponse projectInventoryResponse = new ProjectInventoryResponse();
 
-        projectInventoryResponse.setId( entity.getId() );
-        projectInventoryResponse.setUnitNo( entity.getUnitNo() );
-        projectInventoryResponse.setType( entity.getType() );
         projectInventoryResponse.setArea( entity.getArea() );
+        projectInventoryResponse.setId( entity.getId() );
         projectInventoryResponse.setPrice( entity.getPrice() );
         projectInventoryResponse.setStatus( entity.getStatus() );
+        projectInventoryResponse.setTotalCost( entity.getTotalCost() );
+        projectInventoryResponse.setType( entity.getType() );
+        projectInventoryResponse.setUnitNo( entity.getUnitNo() );
 
         return projectInventoryResponse;
     }
@@ -101,10 +120,10 @@ public class ProjectMapperImpl implements ProjectMapper {
 
         projectTransactionResponse.setInvoiceNo( entity.getInvoiceNumber() );
         projectTransactionResponse.setDate( entity.getInvoiceDate() );
-        projectTransactionResponse.setId( entity.getId() );
-        projectTransactionResponse.setDescription( entity.getDescription() );
         projectTransactionResponse.setAmount( entity.getAmount() );
         projectTransactionResponse.setCollectedAmount( entity.getCollectedAmount() );
+        projectTransactionResponse.setDescription( entity.getDescription() );
+        projectTransactionResponse.setId( entity.getId() );
         if ( entity.getStatus() != null ) {
             projectTransactionResponse.setStatus( entity.getStatus().name() );
         }
@@ -121,13 +140,13 @@ public class ProjectMapperImpl implements ProjectMapper {
         ProjectExpenseResponse projectExpenseResponse = new ProjectExpenseResponse();
 
         projectExpenseResponse.setDate( entity.getExpenseDate() );
-        projectExpenseResponse.setId( entity.getId() );
+        projectExpenseResponse.setAddedBy( entity.getAddedBy() );
+        projectExpenseResponse.setAmount( entity.getAmount() );
         if ( entity.getCategory() != null ) {
             projectExpenseResponse.setCategory( entity.getCategory().name() );
         }
         projectExpenseResponse.setDescription( entity.getDescription() );
-        projectExpenseResponse.setAmount( entity.getAmount() );
-        projectExpenseResponse.setAddedBy( entity.getAddedBy() );
+        projectExpenseResponse.setId( entity.getId() );
         projectExpenseResponse.setReceiptUrl( entity.getReceiptUrl() );
 
         return projectExpenseResponse;
@@ -160,8 +179,8 @@ public class ProjectMapperImpl implements ProjectMapper {
         projectDocumentResponse.setName( entity.getOriginalName() );
         projectDocumentResponse.setType( entity.getMimeType() );
         projectDocumentResponse.setSize( mapFileSize( entity.getFileSize() ) );
-        projectDocumentResponse.setId( entity.getId() );
         projectDocumentResponse.setFileUrl( entity.getFileUrl() );
+        projectDocumentResponse.setId( entity.getId() );
         projectDocumentResponse.setUploadedAt( entity.getUploadedAt() );
 
         return projectDocumentResponse;

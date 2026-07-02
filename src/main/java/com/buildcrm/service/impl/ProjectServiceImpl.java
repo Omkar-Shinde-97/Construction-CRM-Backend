@@ -3,15 +3,21 @@ package com.buildcrm.service.impl;
 import com.buildcrm.dto.request.CreateProjectRequest;
 import com.buildcrm.dto.request.UpdateProjectRequest;
 import com.buildcrm.dto.request.AddInventoryRequest;
+import com.buildcrm.dto.request.AddNoteRequest;
 import com.buildcrm.dto.request.AddDocumentRequest;
 import com.buildcrm.dto.request.AddExpenseRequest;
 import com.buildcrm.dto.request.AddTransactionRequest;
+import com.buildcrm.domain.model.Employee;
 import com.buildcrm.dto.request.AddActivityRequest;
+import com.buildcrm.dto.response.EmployeeResponse;
 import com.buildcrm.dto.response.PagedResponse;
+import com.buildcrm.dto.response.ProjectInventoryResponse;
+import com.buildcrm.dto.response.ProjectNoteResponse;
 import com.buildcrm.dto.response.ProjectResponse;
 import com.buildcrm.entity.ProjectEntity;
 import com.buildcrm.entity.EmployeeEntity;
 import com.buildcrm.entity.ProjectInventoryEntity;
+import com.buildcrm.entity.ProjectNoteEntity;
 import com.buildcrm.entity.DocumentEntity;
 import com.buildcrm.entity.ExpenseEntity;
 import com.buildcrm.entity.SaleTransactionEntity;
@@ -20,7 +26,9 @@ import com.buildcrm.enums.ProjectCategory;
 import com.buildcrm.enums.ProjectStatus;
 import com.buildcrm.exception.BadRequestException;
 import com.buildcrm.exception.ResourceNotFoundException;
+import com.buildcrm.mapper.EmployeeMapper;
 import com.buildcrm.mapper.ProjectMapper;
+import com.buildcrm.repository.ProjectNoteRepository;
 import com.buildcrm.repository.ProjectRepository;
 import com.buildcrm.repository.EmployeeRepository;
 import com.buildcrm.repository.ProjectInventoryRepository;
@@ -29,9 +37,12 @@ import com.buildcrm.repository.ExpenseRepository;
 import com.buildcrm.repository.SaleTransactionRepository;
 import com.buildcrm.repository.ActivityLogRepository;
 import com.buildcrm.service.interfaces.ProjectService;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,6 +62,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
+    private final ProjectNoteRepository projectNoteRepository;
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
     private final ProjectInventoryRepository projectInventoryRepository;
@@ -59,17 +71,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final SaleTransactionRepository saleTransactionRepository;
     private final ActivityLogRepository activityLogRepository;
     private final ProjectMapper projectMapper;
+    private final EmployeeMapper employeeMapper;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, EmployeeRepository employeeRepository, ProjectInventoryRepository projectInventoryRepository, DocumentRepository documentRepository, ExpenseRepository expenseRepository, SaleTransactionRepository saleTransactionRepository, ActivityLogRepository activityLogRepository, ProjectMapper projectMapper) {
-        this.projectRepository = projectRepository;
-        this.employeeRepository = employeeRepository;
-        this.projectInventoryRepository = projectInventoryRepository;
-        this.documentRepository = documentRepository;
-        this.expenseRepository = expenseRepository;
-        this.saleTransactionRepository = saleTransactionRepository;
-        this.activityLogRepository = activityLogRepository;
-        this.projectMapper = projectMapper;
-    }
 
     @Override
     @Transactional
@@ -118,9 +121,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectResponse getProject(UUID id) {
-        return projectRepository.findByIdAndDeletedFalse(id)
-            .map(projectMapper::toResponse)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        java.util.Optional<ProjectEntity> data = projectRepository.findByIdAndDeletedFalse(id);
+System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null).getTeam().size());
+         return data.map(projectMapper::toResponse)
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));       
     }
 
       @Override
@@ -129,6 +133,38 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findByProjectCodeAndDeletedFalse(id)
             .map(projectMapper::toResponse)
             .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+    }
+
+      @Override
+      @Transactional
+    public List<ProjectNoteResponse> getProjectNotes(UUID id) {
+     projectRepository.findByIdAndDeletedFalse(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+
+        List<ProjectNoteEntity> notesEntityList=  projectNoteRepository.findByProjectIdAndDeletedFalse(id);
+
+
+        return notesEntityList.stream()
+            .map(projectMapper::toNoteResponse)
+            .collect(Collectors.toList());
+    }
+
+     @Override
+    public ProjectNoteResponse addNote(UUID id, AddNoteRequest request) {
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+
+        ProjectNoteEntity note = ProjectNoteEntity.builder()
+            .id(UUID.randomUUID())
+            .project(project)
+            .content(request.note())
+            .createdBy(request.createdBy())
+            .createdAt(OffsetDateTime.now())
+            .build();
+
+        ProjectNoteEntity savedNote = projectNoteRepository.save(note);
+
+        return projectMapper.toNoteResponse(savedNote);
     }
 
     @Override
@@ -192,6 +228,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
+
     @Override
     @Transactional
     @SuppressWarnings("null")
@@ -242,7 +279,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectResponse addInventory(UUID id, AddInventoryRequest request) {
+    public ProjectInventoryResponse addInventory(UUID id, AddInventoryRequest request) {
         ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
             .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
@@ -254,26 +291,36 @@ public class ProjectServiceImpl implements ProjectService {
             .area(request.getArea())
             .price(request.getPrice())
             .status(request.getStatus())
+            .totalCost( request.getArea().multiply(request.getPrice()))
             .build();
 
-        projectInventoryRepository.save(inventory);
-
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(com.buildcrm.enums.ActivityType.PROJECT_UPDATED)
-            .title("Inventory Added")
-            .description("Inventory unit " + request.getUnitNo() + " added to project")
-            .performedBy("System")
-            .entityType("PROJECT_INVENTORY")
-            .entityId(inventory.getId())
-            .build();
-        activityLogRepository.save(activity);
-
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
-        return projectMapper.toResponse(project);
+       ProjectInventoryEntity savedInventory = projectInventoryRepository.save(inventory);
+            
+        return projectMapper.toInventoryResponse(savedInventory);
     }
+
+        @Override
+    @Transactional
+    public List<ProjectInventoryResponse> getInventories(UUID id) {
+           List<ProjectInventoryEntity> inventories = projectInventoryRepository.findByProjectIdAndDeletedFalse(id);
+
+        return inventories.stream()
+            .map(projectMapper::toInventoryResponse)
+            .collect(Collectors.toList());
+            
+    }
+
+  @Override
+@Transactional
+public List<EmployeeResponse> getProjectTeam(UUID id) {
+
+    projectRepository.findByIdAndDeletedFalse(id)
+        .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+
+    return employeeMapper.toResponseList(
+        projectRepository.findTeamByProjectId(id)
+    );
+}
 
     @Override
     @Transactional
@@ -422,23 +469,30 @@ public class ProjectServiceImpl implements ProjectService {
             .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
         Set<EmployeeEntity> team = new HashSet<>(employeeRepository.findAllById(employeeIds));
+    
         project.setTeam(team);
         projectRepository.save(project);
 
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(com.buildcrm.enums.ActivityType.PROJECT_UPDATED)
-            .title("Team Updated")
-            .description("Project team members updated")
-            .performedBy("System")
-            .entityType("PROJECT")
-            .entityId(project.getId())
-            .build();
-        activityLogRepository.save(activity);
+        // ActivityLogEntity activity = ActivityLogEntity.builder()
+        //     .id(UUID.randomUUID())
+        //     .projectId(project.getId())
+        //     .activityType(com.buildcrm.enums.ActivityType.PROJECT_UPDATED)
+        //     .title("Team Updated")
+        //     .description("Project team members updated")
+        //     .performedBy("System")
+        //     .entityType("PROJECT")
+        //     .entityId(project.getId())
+        //     .build();
+        // activityLogRepository.save(activity);
+
+        System.out.println(project.getTeam().size() + " team members assigned to project with id: " + id);
 
         project = projectRepository.findByIdAndDeletedFalse(id)
             .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+
+                    System.out.println(project.getTeam().size() + " team members assigned to project with id: " + id);
+
         return projectMapper.toResponse(project);
     }
+
 }

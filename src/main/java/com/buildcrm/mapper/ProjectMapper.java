@@ -3,7 +3,9 @@ package com.buildcrm.mapper;
 import com.buildcrm.dto.response.*;
 import com.buildcrm.entity.ProjectEntity;
 import com.buildcrm.entity.ProjectInventoryEntity;
+import com.buildcrm.entity.ProjectNoteEntity;
 import com.buildcrm.entity.DocumentEntity;
+import com.buildcrm.entity.EmployeeEntity;
 import com.buildcrm.entity.ExpenseEntity;
 import com.buildcrm.entity.SaleTransactionEntity;
 import com.buildcrm.entity.ActivityLogEntity;
@@ -11,9 +13,12 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Set;
 
 import static com.buildcrm.enums.EmployeeRole.LABOR;
 import static com.buildcrm.enums.ExpenseCategory.*;
@@ -24,7 +29,12 @@ public interface ProjectMapper {
     @Mapping(source = "team", target = "teamMembers")
     @Mapping(source = "contractValue", target = "totalContractValue")
     @Mapping(source = "salesTransactions", target = "transactions")
+    @Mapping(source = "inventories", target = "inventories")
+
     ProjectResponse toResponse(ProjectEntity entity);
+
+    ProjectNoteResponse toNoteResponse(ProjectNoteEntity entity);
+    
 
     ProjectInventoryResponse toInventoryResponse(ProjectInventoryEntity entity);
 
@@ -42,6 +52,7 @@ public interface ProjectMapper {
     @Mapping(source = "originalName", target = "name")
     @Mapping(source = "mimeType", target = "type")
     @Mapping(source = "fileSize", target = "size")
+    
     ProjectDocumentResponse toDocumentResponse(DocumentEntity entity);
 
     default String mapFileSize(Long size) {

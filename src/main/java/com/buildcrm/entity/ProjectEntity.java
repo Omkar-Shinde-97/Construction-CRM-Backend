@@ -2,6 +2,8 @@ package com.buildcrm.entity;
 
 import com.buildcrm.enums.ProjectCategory;
 import com.buildcrm.enums.ProjectStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +21,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
@@ -28,7 +33,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
@@ -98,7 +104,9 @@ public class ProjectEntity extends BaseEntity {
         joinColumns = @JoinColumn(name = "project_id"),
         inverseJoinColumns = @JoinColumn(name = "employee_id")
     )
+     
     @Builder.Default
+    @EqualsAndHashCode.Exclude
     private Set<EmployeeEntity> team = new HashSet<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)

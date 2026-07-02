@@ -15,7 +15,8 @@ public class ProjectInventoryResponse {
     private UUID id;
     private String unitNo;
     private String type;          // Flat, Plot, NA Plot
-    private String area;
+    private BigDecimal area;
     private BigDecimal price;
-    private String status;        // Available, Sold, Blocked
+    private String status;   // Available, Sold, Blocked
+    private BigDecimal totalCost;     
 }

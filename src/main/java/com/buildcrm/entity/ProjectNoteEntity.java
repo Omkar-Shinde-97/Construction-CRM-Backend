@@ -42,6 +42,8 @@ public class ProjectNoteEntity extends BaseEntity {
     @Column(name = "is_pinned")
     private boolean pinned;
 
+    private String createdBy;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 }

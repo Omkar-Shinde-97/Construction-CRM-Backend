@@ -3,6 +3,7 @@ package com.buildcrm.entity;
 import com.buildcrm.enums.Department;
 import com.buildcrm.enums.EmployeeRole;
 import com.buildcrm.enums.EmployeeStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +14,11 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
@@ -24,7 +27,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
@@ -82,5 +86,6 @@ public class EmployeeEntity extends BaseEntity {
 
     @ManyToMany(mappedBy = "team", fetch = FetchType.LAZY)
     @Builder.Default
+    @EqualsAndHashCode.Exclude
     private Set<ProjectEntity> projects = new HashSet<>();
 }

@@ -13,7 +13,7 @@ public class AddInventoryRequest {
     @NotBlank
     private String type; // Flat, Plot, NA Plot
 
-    private String area;
+    private BigDecimal area;
 
     @NotNull
     @PositiveOrZero
@@ -38,11 +38,11 @@ public class AddInventoryRequest {
         this.type = type;
     }
 
-    public String getArea() {
+    public BigDecimal getArea() {
         return area;
     }
 
-    public void setArea(String area) {
+    public void setArea(BigDecimal area) {
         this.area = area;
     }
 
