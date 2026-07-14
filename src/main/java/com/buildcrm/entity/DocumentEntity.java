@@ -41,14 +41,17 @@ public class DocumentEntity extends BaseEntity {
     @JoinColumn(name = "employee_id")
     private EmployeeEntity employee;
 
+    @Column(name = "file_title")
+    private String fileTitle;
+
     @Column(name = "file_name")
     private String fileName;
 
     @Column(name = "original_name")
     private String originalName;
 
-    @Column(name = "file_url")
-    private String fileUrl;
+    @Column(name = "file_data", columnDefinition = "VARBINARY(10485760)")
+    private byte[] fileData;
 
     @Column(name = "file_size")
     private Long fileSize;

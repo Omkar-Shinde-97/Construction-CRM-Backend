@@ -12,7 +12,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ProjectTransactionResponse {
-
     private UUID id;
     private String invoiceNo;
     private LocalDate date;

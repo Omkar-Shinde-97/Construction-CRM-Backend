@@ -12,12 +12,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ProjectExpenseResponse {
-
     private UUID id;
     private LocalDate date;
     private String category; // Labor, Material, Equipment, Overhead
     private String description;
     private BigDecimal amount;
     private String addedBy;
-    private String receiptUrl;
+    private byte[] receiptImage;
+    private String receiptFileName;
+    private String receiptContentType;
+    private String vendorName;
 }

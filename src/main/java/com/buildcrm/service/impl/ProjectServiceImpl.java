@@ -7,13 +7,8 @@ import com.buildcrm.dto.request.AddNoteRequest;
 import com.buildcrm.dto.request.AddDocumentRequest;
 import com.buildcrm.dto.request.AddExpenseRequest;
 import com.buildcrm.dto.request.AddTransactionRequest;
-import com.buildcrm.domain.model.Employee;
 import com.buildcrm.dto.request.AddActivityRequest;
-import com.buildcrm.dto.response.EmployeeResponse;
-import com.buildcrm.dto.response.PagedResponse;
-import com.buildcrm.dto.response.ProjectInventoryResponse;
-import com.buildcrm.dto.response.ProjectNoteResponse;
-import com.buildcrm.dto.response.ProjectResponse;
+import com.buildcrm.dto.response.*;
 import com.buildcrm.entity.ProjectEntity;
 import com.buildcrm.entity.EmployeeEntity;
 import com.buildcrm.entity.ProjectInventoryEntity;
@@ -48,7 +43,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -80,8 +77,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse createProject(CreateProjectRequest request) {
         EmployeeEntity projectManager = null;
         if (request.getProjectManagerId() != null) {
-            projectManager = employeeRepository.findByIdAndDeletedFalse(request.getProjectManagerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getProjectManagerId()));
+            projectManager = employeeRepository.findByIdAndDeletedFalse(request.getProjectManagerId()).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getProjectManagerId()));
         }
 
         Set<EmployeeEntity> team = new HashSet<>();
@@ -89,25 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
             team.addAll(employeeRepository.findAllById(request.getTeamMemberIds()));
         }
 
-        ProjectEntity project = ProjectEntity.builder()
-            .id(UUID.randomUUID())
-            .projectCode(generateProjectCode())
-            .name(request.getName())
-            .clientName(request.getClientName())
-            .clientEmail(request.getClientEmail())
-            .clientPhone(request.getClientPhone())
-            .category(request.getCategory())
-            .status(request.getStatus())
-            .location(request.getLocation())
-            .description(request.getDescription())
-            .startDate(request.getStartDate())
-            .endDate(request.getEndDate())
-            .totalBudget(request.getTotalBudget())
-            .contractValue(request.getContractValue())
-            .completionPercentage(request.getCompletionPercentage())
-            .projectManager(projectManager)
-            .team(team)
-            .build();
+        ProjectEntity project = ProjectEntity.builder().id(UUID.randomUUID()).projectCode(generateProjectCode()).name(request.getName()).clientName(request.getClientName()).clientEmail(request.getClientEmail()).clientPhone(request.getClientPhone()).category(request.getCategory()).status(request.getStatus()).location(request.getLocation()).description(request.getDescription()).startDate(request.getStartDate()).endDate(request.getEndDate()).totalBudget(request.getTotalBudget()).contractValue(request.getContractValue()).completionPercentage(request.getCompletionPercentage()).projectManager(projectManager).team(team).build();
 
         ProjectEntity savedProject = Objects.requireNonNull(projectRepository.save(project));
         return projectMapper.toResponse(savedProject);
@@ -122,45 +100,32 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public ProjectResponse getProject(UUID id) {
         java.util.Optional<ProjectEntity> data = projectRepository.findByIdAndDeletedFalse(id);
-System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null).getTeam().size());
-         return data.map(projectMapper::toResponse)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));       
+        System.out.println("ProjectEntity11111:" + data.stream().findFirst().orElse(null).getTeam().size());
+        return data.map(projectMapper::toResponse).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
     }
 
-      @Override
+    @Override
     @Transactional
     public ProjectResponse getProject(String id) {
-        return projectRepository.findByProjectCodeAndDeletedFalse(id)
-            .map(projectMapper::toResponse)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        return projectRepository.findByProjectCodeAndDeletedFalse(id).map(projectMapper::toResponse).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
     }
 
-      @Override
-      @Transactional
+    @Override
+    @Transactional
     public List<ProjectNoteResponse> getProjectNotes(UUID id) {
-     projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        List<ProjectNoteEntity> notesEntityList=  projectNoteRepository.findByProjectIdAndDeletedFalse(id);
+        List<ProjectNoteEntity> notesEntityList = projectNoteRepository.findByProjectIdAndDeletedFalse(id);
 
 
-        return notesEntityList.stream()
-            .map(projectMapper::toNoteResponse)
-            .collect(Collectors.toList());
+        return notesEntityList.stream().map(projectMapper::toNoteResponse).collect(Collectors.toList());
     }
 
-     @Override
+    @Override
     public ProjectNoteResponse addNote(UUID id, AddNoteRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        ProjectNoteEntity note = ProjectNoteEntity.builder()
-            .id(UUID.randomUUID())
-            .project(project)
-            .content(request.note())
-            .createdBy(request.createdBy())
-            .createdAt(OffsetDateTime.now())
-            .build();
+        ProjectNoteEntity note = ProjectNoteEntity.builder().id(UUID.randomUUID()).project(project).content(request.note()).createdBy(request.createdBy()).createdAt(OffsetDateTime.now()).build();
 
         ProjectNoteEntity savedNote = projectNoteRepository.save(note);
 
@@ -172,15 +137,7 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
     public PagedResponse<ProjectResponse> listProjects(int page, int size, String sort, String status, String category, String search) {
         Pageable pageable = PageRequest.of(page, size, parseSort(sort));
         var result = projectRepository.findAll(projectSpec(status, category, search), pageable);
-        return new PagedResponse<>(
-            result.getContent().stream().map(projectMapper::toResponse).collect(Collectors.toList()),
-            result.getNumber(),
-            result.getSize(),
-            result.getTotalElements(),
-            result.getTotalPages(),
-            result.isFirst(),
-            result.isLast()
-        );
+        return new PagedResponse<>(result.getContent().stream().map(projectMapper::toResponse).collect(Collectors.toList()), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isFirst(), result.isLast());
     }
 
     private Specification<ProjectEntity> projectSpec(String status, String category, String search) {
@@ -196,12 +153,7 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
             }
             if (search != null && !search.isBlank()) {
                 String pattern = "%" + search.toLowerCase() + "%";
-                predicates.add(criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("clientName")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("projectCode")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("location")), pattern)
-                ));
+                predicates.add(criteriaBuilder.or(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), pattern), criteriaBuilder.like(criteriaBuilder.lower(root.get("clientName")), pattern), criteriaBuilder.like(criteriaBuilder.lower(root.get("projectCode")), pattern), criteriaBuilder.like(criteriaBuilder.lower(root.get("location")), pattern)));
             }
 
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
@@ -214,9 +166,7 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
         }
         String[] parts = sort.split(",", 2);
         String property = parts[0].isBlank() ? "createdAt" : parts[0].trim();
-        Sort.Direction direction = parts.length > 1 && "asc".equalsIgnoreCase(parts[1].trim())
-            ? Sort.Direction.ASC
-            : Sort.Direction.DESC;
+        Sort.Direction direction = parts.length > 1 && "asc".equalsIgnoreCase(parts[1].trim()) ? Sort.Direction.ASC : Sort.Direction.DESC;
         return Sort.by(direction, property);
     }
 
@@ -233,8 +183,7 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
     @Transactional
     @SuppressWarnings("null")
     public ProjectResponse updateProject(UUID id, UpdateProjectRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
         project.setName(request.getName());
         project.setClientName(request.getClientName());
         project.setClientEmail(request.getClientEmail());
@@ -250,8 +199,7 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
         project.setCompletionPercentage(request.getCompletionPercentage());
 
         if (request.getProjectManagerId() != null) {
-            EmployeeEntity projectManager = employeeRepository.findByIdAndDeletedFalse(request.getProjectManagerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getProjectManagerId()));
+            EmployeeEntity projectManager = employeeRepository.findByIdAndDeletedFalse(request.getProjectManagerId()).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getProjectManagerId()));
             project.setProjectManager(projectManager);
         } else {
             project.setProjectManager(null);
@@ -280,196 +228,152 @@ System.out.println("ProjectEntity11111:" +data.stream().findFirst().orElse(null)
     @Override
     @Transactional
     public ProjectInventoryResponse addInventory(UUID id, AddInventoryRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        ProjectInventoryEntity inventory = ProjectInventoryEntity.builder()
-            .id(UUID.randomUUID())
-            .project(project)
-            .unitNo(request.getUnitNo())
-            .type(request.getType())
-            .area(request.getArea())
-            .price(request.getPrice())
-            .status(request.getStatus())
-            .totalCost( request.getArea().multiply(request.getPrice()))
-            .build();
+        ProjectInventoryEntity inventory = ProjectInventoryEntity.builder().id(UUID.randomUUID()).project(project).unitNo(request.getUnitNo()).type(request.getType()).area(request.getArea()).price(request.getPrice()).status(request.getStatus()).totalCost(request.getArea().multiply(request.getPrice())).build();
 
-       ProjectInventoryEntity savedInventory = projectInventoryRepository.save(inventory);
-            
+        ProjectInventoryEntity savedInventory = projectInventoryRepository.save(inventory);
+
         return projectMapper.toInventoryResponse(savedInventory);
     }
 
-        @Override
+    @Override
     @Transactional
     public List<ProjectInventoryResponse> getInventories(UUID id) {
-           List<ProjectInventoryEntity> inventories = projectInventoryRepository.findByProjectIdAndDeletedFalse(id);
+        List<ProjectInventoryEntity> inventories = projectInventoryRepository.findByProjectIdAndDeletedFalse(id);
 
-        return inventories.stream()
-            .map(projectMapper::toInventoryResponse)
-            .collect(Collectors.toList());
-            
-    }
+        return inventories.stream().map(projectMapper::toInventoryResponse).collect(Collectors.toList());
 
-  @Override
-@Transactional
-public List<EmployeeResponse> getProjectTeam(UUID id) {
-
-    projectRepository.findByIdAndDeletedFalse(id)
-        .orElseThrow(() -> new EntityNotFoundException("Project not found"));
-
-    return employeeMapper.toResponseList(
-        projectRepository.findTeamByProjectId(id)
-    );
-}
-
-    @Override
-    @Transactional
-    public ProjectResponse addDocument(UUID id, AddDocumentRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
-
-        DocumentEntity document = DocumentEntity.builder()
-            .id(UUID.randomUUID())
-            .project(project)
-            .fileName(request.getName())
-            .originalName(request.getName())
-            .fileUrl(request.getFileUrl())
-            .fileSize(request.getFileSize())
-            .documentType(request.getDocumentType())
-            .description(request.getDescription())
-            .uploadedBy(request.getUploadedBy() != null ? request.getUploadedBy() : "System")
-            .uploadedAt(OffsetDateTime.now())
-            .build();
-
-        documentRepository.save(document);
-
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(com.buildcrm.enums.ActivityType.DOCUMENT_UPLOADED)
-            .title("Document Uploaded")
-            .description("Document " + request.getName() + " uploaded to project")
-            .performedBy(request.getUploadedBy() != null ? request.getUploadedBy() : "System")
-            .entityType("DOCUMENT")
-            .entityId(document.getId())
-            .build();
-        activityLogRepository.save(activity);
-
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
-        return projectMapper.toResponse(project);
     }
 
     @Override
     @Transactional
-    public ProjectResponse addExpense(UUID id, AddExpenseRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+    public List<EmployeeResponse> getProjectTeam(UUID id) {
 
-        ExpenseEntity expense = ExpenseEntity.builder()
-            .id(UUID.randomUUID())
-            .project(project)
-            .category(request.getCategory())
-            .description(request.getDescription())
-            .amount(request.getAmount())
-            .expenseDate(request.getExpenseDate())
-            .vendorName(request.getVendorName())
-            .receiptUrl(request.getReceiptUrl())
-            .addedBy(request.getAddedBy() != null ? request.getAddedBy() : "System")
-            .approved(true)
-            .build();
+        projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-        expenseRepository.save(expense);
+        return employeeMapper.toResponseList(projectRepository.findTeamByProjectId(id));
+    }
 
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(com.buildcrm.enums.ActivityType.EXPENSE_ADDED)
-            .title("Expense Added")
-            .description("Expense of " + request.getAmount() + " added to project: " + request.getDescription())
-            .performedBy(request.getAddedBy() != null ? request.getAddedBy() : "System")
-            .entityType("EXPENSE")
-            .entityId(expense.getId())
-            .build();
-        activityLogRepository.save(activity);
+    @Override
+    @Transactional
+    public ProjectDocumentResponse addDocument(UUID id, AddDocumentRequest request, MultipartFile file) {
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
-        return projectMapper.toResponse(project);
+        try {
+            DocumentEntity document = DocumentEntity.builder().id(UUID.randomUUID()).project(project).fileName(file.getOriginalFilename()).mimeType(file.getContentType()).fileSize(file.getSize()).fileData(file.getBytes()).description(request.getDescription()).uploadedAt(OffsetDateTime.now()).fileTitle(request.getTitle()).build();
+            documentRepository.save(document);
+
+//            ActivityLogEntity activity = ActivityLogEntity.builder().id(UUID.randomUUID()).projectId(project.getId()).activityType(com.buildcrm.enums.ActivityType.DOCUMENT_UPLOADED).title("Document Uploaded").description("Document " + request.getName() + " uploaded to project").performedBy(request.getUploadedBy() != null ? request.getUploadedBy() : "System").entityType("DOCUMENT").entityId(document.getId()).build();
+//            activityLogRepository.save(activity);
+
+            return projectMapper.toDocumentResponse(document);
+        } catch (IOException ex) {
+
+            throw new RuntimeException("Failed to process uploaded receipt", ex);
+        }
+
+    }
+
+
+    @Override
+    public List<ProjectDocumentResponse> getDocuments(UUID id) {
+            projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+
+        List<DocumentEntity> documents = documentRepository.findByProjectIdAndDeletedFalse(id);
+
+        return documents.stream().map(projectMapper::toDocumentResponse).collect(Collectors.toList());
+ 
+            }
+
+    public byte[] getDocumentFile(UUID documentId) {
+
+        DocumentEntity document = documentRepository.findById(documentId).orElseThrow(() -> new ResourceNotFoundException("Document not found"));
+
+        return document.getFileData();
+    }
+
+    @Override
+    public ProjectExpenseResponse addExpense(UUID projectId, AddExpenseRequest request, MultipartFile receipt) {
+
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        ExpenseEntity expense = ExpenseEntity.builder().id(UUID.randomUUID()).project(project).category(request.getCategory()).description(request.getDescription()).amount(request.getAmount()).expenseDate(request.getExpenseDate()).vendorName(request.getVendorName()).addedBy(request.getAddedBy()).approved(false).build();
+
+        try {
+
+            if (receipt != null && !receipt.isEmpty()) {
+
+                expense.setReceiptImage(receipt.getBytes());
+
+                expense.setReceiptFileName(receipt.getOriginalFilename());
+
+                expense.setReceiptContentType(receipt.getContentType());
+            }
+
+        } catch (IOException ex) {
+
+            throw new RuntimeException("Failed to process uploaded receipt", ex);
+        }
+
+        expense = expenseRepository.save(expense);
+
+        return projectMapper.toExpenseResponse(expense);
+    }
+
+    @Override
+    public List<ProjectExpenseResponse> getExpenses(UUID id) {
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        List<ExpenseEntity> expensesEntity = expenseRepository.findByProjectIdAndDeletedFalse(id);
+        return expensesEntity.stream().map(projectMapper::toExpenseResponse).collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional()
+    public ProjectFileResponse getDocumentFile(UUID projectId, UUID documentId) {
+
+        DocumentEntity document = documentRepository.findById(documentId).orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + documentId));
+
+        return projectMapper.toFileResponse(document);
     }
 
     @Override
     @Transactional
     public ProjectResponse addTransaction(UUID id, AddTransactionRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        SaleTransactionEntity transaction = SaleTransactionEntity.builder()
-            .id(UUID.randomUUID())
-            .project(project)
-            .invoiceNumber(request.getInvoiceNumber())
-            .description(request.getDescription())
-            .amount(request.getAmount())
-            .collectedAmount(request.getCollectedAmount())
-            .status(request.getStatus())
-            .invoiceDate(request.getInvoiceDate())
-            .dueDate(request.getDueDate())
-            .paymentMode(request.getPaymentMode())
-            .transactionReference(request.getTransactionReference())
-            .notes(request.getNotes())
-            .build();
+        SaleTransactionEntity transaction = SaleTransactionEntity.builder().id(UUID.randomUUID()).project(project).invoiceNumber(request.getInvoiceNumber()).description(request.getDescription()).amount(request.getAmount()).collectedAmount(request.getCollectedAmount()).status(request.getStatus()).invoiceDate(request.getInvoiceDate()).dueDate(request.getDueDate()).paymentMode(request.getPaymentMode()).transactionReference(request.getTransactionReference()).notes(request.getNotes()).build();
 
         saleTransactionRepository.save(transaction);
 
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(com.buildcrm.enums.ActivityType.PAYMENT_RECEIVED)
-            .title("Payment Received")
-            .description("Invoice " + request.getInvoiceNumber() + " with amount " + request.getAmount() + " recorded")
-            .performedBy("System")
-            .entityType("SALE_TRANSACTION")
-            .entityId(transaction.getId())
-            .build();
+        ActivityLogEntity activity = ActivityLogEntity.builder().id(UUID.randomUUID()).projectId(project.getId()).activityType(com.buildcrm.enums.ActivityType.PAYMENT_RECEIVED).title("Payment Received").description("Invoice " + request.getInvoiceNumber() + " with amount " + request.getAmount() + " recorded").performedBy("System").entityType("SALE_TRANSACTION").entityId(transaction.getId()).build();
         activityLogRepository.save(activity);
 
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
         return projectMapper.toResponse(project);
     }
 
     @Override
     @Transactional
     public ProjectResponse addActivity(UUID id, AddActivityRequest request) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        ActivityLogEntity activity = ActivityLogEntity.builder()
-            .id(UUID.randomUUID())
-            .projectId(project.getId())
-            .activityType(request.getActivityType())
-            .title(request.getTitle())
-            .description(request.getDescription())
-            .performedBy(request.getPerformedBy() != null ? request.getPerformedBy() : "System")
-            .entityType("PROJECT")
-            .entityId(project.getId())
-            .build();
+        ActivityLogEntity activity = ActivityLogEntity.builder().id(UUID.randomUUID()).projectId(project.getId()).activityType(request.getActivityType()).title(request.getTitle()).description(request.getDescription()).performedBy(request.getPerformedBy() != null ? request.getPerformedBy() : "System").entityType("PROJECT").entityId(project.getId()).build();
 
         activityLogRepository.save(activity);
 
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
         return projectMapper.toResponse(project);
     }
 
     @Override
     @Transactional
     public ProjectResponse assignTeam(UUID id, Set<UUID> employeeIds) {
-        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        ProjectEntity project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
         Set<EmployeeEntity> team = new HashSet<>(employeeRepository.findAllById(employeeIds));
-    
+
         project.setTeam(team);
         projectRepository.save(project);
 
@@ -487,10 +391,9 @@ public List<EmployeeResponse> getProjectTeam(UUID id) {
 
         System.out.println(project.getTeam().size() + " team members assigned to project with id: " + id);
 
-        project = projectRepository.findByIdAndDeletedFalse(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        project = projectRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-                    System.out.println(project.getTeam().size() + " team members assigned to project with id: " + id);
+        System.out.println(project.getTeam().size() + " team members assigned to project with id: " + id);
 
         return projectMapper.toResponse(project);
     }

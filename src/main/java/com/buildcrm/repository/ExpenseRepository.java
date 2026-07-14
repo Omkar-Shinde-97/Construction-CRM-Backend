@@ -12,6 +12,8 @@ import java.util.UUID;
 @Repository
 public interface ExpenseRepository extends JpaRepository<ExpenseEntity, UUID> {
     Optional<ExpenseEntity> findByIdAndDeletedFalse(UUID id);
+
     List<ExpenseEntity> findByProjectIdAndDeletedFalse(UUID projectId);
+
     List<ExpenseEntity> findByCategoryAndDeletedFalse(ExpenseCategory category);
 }

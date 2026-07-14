@@ -4,6 +4,7 @@ import com.buildcrm.dto.response.EmployeeResponse;
 import com.buildcrm.dto.response.ProjectActivityResponse;
 import com.buildcrm.dto.response.ProjectDocumentResponse;
 import com.buildcrm.dto.response.ProjectExpenseResponse;
+import com.buildcrm.dto.response.ProjectFileResponse;
 import com.buildcrm.dto.response.ProjectInventoryResponse;
 import com.buildcrm.dto.response.ProjectNoteResponse;
 import com.buildcrm.dto.response.ProjectResponse;
@@ -17,6 +18,7 @@ import com.buildcrm.entity.ProjectInventoryEntity;
 import com.buildcrm.entity.ProjectNoteEntity;
 import com.buildcrm.entity.SaleTransactionEntity;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +28,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-01T21:36:50+0530",
+    date = "2026-07-08T20:51:59+0530",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
@@ -83,9 +85,9 @@ public class ProjectMapperImpl implements ProjectMapper {
 
         ProjectNoteResponse projectNoteResponse = new ProjectNoteResponse();
 
-        projectNoteResponse.setCreatedAt( entity.getCreatedAt() );
-        projectNoteResponse.setCreatedBy( entity.getCreatedBy() );
         projectNoteResponse.setId( entity.getId() );
+        projectNoteResponse.setCreatedBy( entity.getCreatedBy() );
+        projectNoteResponse.setCreatedAt( entity.getCreatedAt() );
         projectNoteResponse.setNote( entity.getContent() );
 
         return projectNoteResponse;
@@ -99,13 +101,13 @@ public class ProjectMapperImpl implements ProjectMapper {
 
         ProjectInventoryResponse projectInventoryResponse = new ProjectInventoryResponse();
 
-        projectInventoryResponse.setArea( entity.getArea() );
         projectInventoryResponse.setId( entity.getId() );
+        projectInventoryResponse.setUnitNo( entity.getUnitNo() );
+        projectInventoryResponse.setType( entity.getType() );
+        projectInventoryResponse.setArea( entity.getArea() );
         projectInventoryResponse.setPrice( entity.getPrice() );
         projectInventoryResponse.setStatus( entity.getStatus() );
         projectInventoryResponse.setTotalCost( entity.getTotalCost() );
-        projectInventoryResponse.setType( entity.getType() );
-        projectInventoryResponse.setUnitNo( entity.getUnitNo() );
 
         return projectInventoryResponse;
     }
@@ -147,7 +149,13 @@ public class ProjectMapperImpl implements ProjectMapper {
         }
         projectExpenseResponse.setDescription( entity.getDescription() );
         projectExpenseResponse.setId( entity.getId() );
-        projectExpenseResponse.setReceiptUrl( entity.getReceiptUrl() );
+        projectExpenseResponse.setReceiptContentType( entity.getReceiptContentType() );
+        projectExpenseResponse.setReceiptFileName( entity.getReceiptFileName() );
+        byte[] receiptImage = entity.getReceiptImage();
+        if ( receiptImage != null ) {
+            projectExpenseResponse.setReceiptImage( Arrays.copyOf( receiptImage, receiptImage.length ) );
+        }
+        projectExpenseResponse.setVendorName( entity.getVendorName() );
 
         return projectExpenseResponse;
     }
@@ -176,14 +184,33 @@ public class ProjectMapperImpl implements ProjectMapper {
 
         ProjectDocumentResponse projectDocumentResponse = new ProjectDocumentResponse();
 
-        projectDocumentResponse.setName( entity.getOriginalName() );
+        projectDocumentResponse.setName( entity.getFileTitle() );
         projectDocumentResponse.setType( entity.getMimeType() );
         projectDocumentResponse.setSize( mapFileSize( entity.getFileSize() ) );
-        projectDocumentResponse.setFileUrl( entity.getFileUrl() );
         projectDocumentResponse.setId( entity.getId() );
         projectDocumentResponse.setUploadedAt( entity.getUploadedAt() );
+        projectDocumentResponse.setFilePresent( entity.getFileData() != null );
 
         return projectDocumentResponse;
+    }
+
+    @Override
+    public ProjectFileResponse toFileResponse(DocumentEntity entity) {
+        if ( entity == null ) {
+            return null;
+        }
+
+        ProjectFileResponse projectFileResponse = new ProjectFileResponse();
+
+        byte[] fileData = entity.getFileData();
+        if ( fileData != null ) {
+            projectFileResponse.setFileData( Arrays.copyOf( fileData, fileData.length ) );
+        }
+        projectFileResponse.setFileName( entity.getFileName() );
+        projectFileResponse.setId( entity.getId() );
+        projectFileResponse.setMimeType( entity.getMimeType() );
+
+        return projectFileResponse;
     }
 
     protected Set<EmployeeResponse> employeeEntitySetToEmployeeResponseSet(Set<EmployeeEntity> set) {

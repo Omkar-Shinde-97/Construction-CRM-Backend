@@ -1,15 +1,7 @@
 package com.buildcrm.entity;
 
 import com.buildcrm.enums.ExpenseCategory;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,8 +44,14 @@ public class ExpenseEntity extends BaseEntity {
     @Column(name = "vendor_name")
     private String vendorName;
 
-    @Column(name = "receipt_url")
-    private String receiptUrl;
+    @Column(name = "receipt_image", columnDefinition = "VARBINARY(10485760)")
+    private byte[] receiptImage;
+
+    @Column(name = "receipt_file_name")
+    private String receiptFileName;
+
+    @Column(name = "receipt_content_type")
+    private String receiptContentType;
 
     @Column(name = "added_by")
     private String addedBy;

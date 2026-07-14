@@ -15,6 +15,6 @@ public class ProjectDocumentResponse {
     private String name;
     private String type;
     private String size;
-    private String fileUrl;
+    private boolean filePresent;
     private OffsetDateTime uploadedAt;
 }
